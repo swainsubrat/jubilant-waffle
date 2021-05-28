@@ -1,0 +1,97 @@
+{
+    // http://eslint.org/docs/rules/
+    "extends":  [
+        "eslint:recommended",
+        "plugin:sonarjs/recommended"
+    ],
+    // "extends": "eslint:all", // FIXME
+    "rules": {
+        "no-useless-escape": ["warn"],
+        "max-len": [
+            "error",
+            {
+                "code": 200
+            }
+        ],
+        "sonarjs/cognitive-complexity": ["warn", 30], // FIXME
+        "sonarjs/no-identical-functions": "warn", // FIXME
+        "sonarjs/no-redundant-jump": "warn", // FIXME
+        "sonarjs/no-duplicate-string": ["error", 20],
+        "require-jsdoc": "off",
+        "require-jsdoc-except/require-jsdoc": ["error", {
+            "publicOnly": false,
+
+            "require": {
+                "FunctionDeclaration": true,
+                "MethodDefinition": true,
+                "ClassDeclaration": true,
+                "ArrowFunctionExpression": true,
+                "FunctionExpression": true
+
+          },
+          "ignore": [
+              "success",
+              "error",
+              "createSeries",
+              "am4themes_myTheme",
+              "complete",
+              "add",
+              "progress",
+              "fail",
+              "done",
+              "onSelect",
+              "onDropdownHide",
+              "slide",
+              "change"
+            ]
+          }]
+    },
+    "plugins": [
+        "require-jsdoc-except",
+        "sonarjs"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 2019
+    },
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es6": true,
+        "jquery": true
+    },
+    "globals": {
+        "am4charts": true,
+        "am4core": true,
+        "am4plugins_wordCloud": true,
+        "am4themes_animated": true,
+        "am4themes_material": true,
+        "datasetVar": true, // FIXME
+        "dsname": true,
+        "dsStage": true,
+        "exp_id": true,
+        "exp_template": true,
+        "expCategory": true,
+        "experimentName": true,
+        "experimentStage": true,
+        "expSubCategory": true,
+        "expTemplate": true,
+        "isDeployed": true,
+        "isSampleData": true,
+        "maxRunTime": true,
+        "moment": true,
+        "NEXA_DEMO_DATASET_SIZE_UPLOAD_LIMIT_MB": true,
+        "NEXA_IS_DEMO_INSTANCE": true,
+        "NEXA_REPLACE_UNKNOWN": true,
+        "NEXA_SUPPORT_EMAIL": true,
+        "nexaSupportEmail": true,
+        "NEXA_VERSION": true,
+        "openPanel": true,
+        "Papa": true,
+        "Prism": true,
+        "rowCount": true,
+        "TargetCol": true,
+        "WRKR_MIN_RUNTIME_MINS": true,
+        "dataUploadError": true
+    },
+    "ignorePatterns": ["**/vendor/*.js", "**/amcharts/*.js", "**/d3_js/*.js","**/solutions/libs/*.js"]
+}

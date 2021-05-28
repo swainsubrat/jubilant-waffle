@@ -1,0 +1,176 @@
+variables:
+  SEMGREP_EXCLUDE: --exclude "Docs/" --exclude "Tests/"
+  SEMGREP_FLAGS: --disable-version-check --timeout 120 --strict --error --verbose
+  SEMGREP_CORE_FLAGS: export SEMGREP_CORE_EXTRA='-max_match_per_file 20000000' &&
+
+jobs:
+  - job: code_quality_check
+    pool:
+      vmImage: ubuntu-18.04
+    variables:
+      PRE_COMMIT_HOME: $(Pipeline.Workspace)/pre-commit-cache
+
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+
+      - script: |
+          echo "##vso[task.setvariable variable=PY]$(python -VV)"
+        displayName: set version variables
+      - task: CacheBeta@0
+        inputs:
+          key: pre-commit | "4" | .pre-commit-config.yaml | "$(PY)"
+          path: $(PRE_COMMIT_HOME)
+
+      - script: python -m pip install --upgrade pre-commit pylint black flake8
+        displayName: install pre-commit
+      - script: |
+          #files=$(git diff --name-only --diff-filter=d $(git merge-base HEAD master)) && \
+          # files=$(git diff --name-only origin/master) && \
+          files=$(git diff --name-only $(git merge-base HEAD  origin/master))  && \
+          echo $files && \
+          pre-commit run check-added-large-files --files $files --show-diff-on-failure && \
+          pre-commit run check-ast --files $files --show-diff-on-failure && \
+          pre-commit run check-byte-order-marker --files $files --show-diff-on-failure && \
+          pre-commit run trailing-whitespace --files $files --show-diff-on-failure && \
+          pre-commit run check-docstring-first --files $files --show-diff-on-failure && \
+          pre-commit run mixed-line-ending --files $files --show-diff-on-failure && \
+          pre-commit run check-executables-have-shebangs --files $files --show-diff-on-failure && \
+          pre-commit run check-merge-conflict --files $files --show-diff-on-failure && \
+          pre-commit run check-symlinks --files $files --show-diff-on-failure && \
+          pre-commit run check-vcs-permalinks --files $files --show-diff-on-failure && \
+          pre-commit run check-json --files $files --show-diff-on-failure && \
+          pre-commit run check-yaml --files $files --show-diff-on-failure && \
+          pre-commit run debug-statements --files $files --show-diff-on-failure && \
+          pre-commit run flake8 --files $files --show-diff-on-failure && \
+          pre-commit run pylint --files $files --show-diff-on-failure && \
+          pre-commit run eslint --files $files --show-diff-on-failure && \
+          pre-commit run bandit --files $files --show-diff-on-failure
+        displayName: run pre-commit
+
+  - job: semgrep_python
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+      - script: python -m pip install --upgrade semgrep
+        displayName: install semgrep
+      - script: |
+          known_issues=$(egrep -v '^$|^#' .semgrepignore | xargs -n1 -d '\n'  -I % echo '--exclude %'  | tr '\n' ' '; echo)
+          $(SEMGREP_CORE_FLAGS) semgrep --config "p/python" $(SEMGREP_EXCLUDE) $(SEMGREP_FLAGS) $known_issues
+        displayName: semgep scan p/python
+
+  - job: semgrep_r2c_ci
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+      - script: python -m pip install --upgrade semgrep
+        displayName: install semgrep
+      - script: |
+          known_issues=$(egrep -v '^$|^#' .semgrepignore | xargs -n1 -d '\n'  -I % echo '--exclude %'  | tr '\n' ' '; echo)
+          $(SEMGREP_CORE_FLAGS) semgrep  --config "p/r2c-ci" $(SEMGREP_EXCLUDE) $(SEMGREP_FLAGS) $known_issues
+        displayName: semgep scan p/r2c-ci
+
+  - job: semgrep_xss
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+      - script: python -m pip install --upgrade semgrep
+        displayName: install semgrep
+      - script: |
+          known_issues=$(egrep -v '^$|^#' .semgrepignore | xargs -n1 -d '\n'  -I % echo '--exclude %'  | tr '\n' ' '; echo)
+          $(SEMGREP_CORE_FLAGS) semgrep  --config  "p/xss" $(SEMGREP_EXCLUDE) $(SEMGREP_FLAGS) $known_issues
+        displayName: semgep scan p/xss
+
+  - job: semgrep_all_python
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+      - script: python -m pip install --upgrade semgrep
+        displayName: install semgrep
+      - script: |
+          known_issues=$(egrep -v '^$|^#' .semgrepignore | xargs -n1 -d '\n'  -I % echo '--exclude %'  | tr '\n' ' '; echo)
+          $(SEMGREP_CORE_FLAGS) semgrep  --config  "p/ascof22.all_python_rules" $(SEMGREP_EXCLUDE) $(SEMGREP_FLAGS) $known_issues
+        displayName: semgep scan p/ascof22.all_python_rules
+
+  - job: semgrep_jwt
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+      - script: python -m pip install --upgrade semgrep
+        displayName: install semgrep
+      - script: |
+          known_issues=$(egrep -v '^$|^#' .semgrepignore | xargs -n1 -d '\n'  -I % echo '--exclude %'  | tr '\n' ' '; echo)
+          $(SEMGREP_CORE_FLAGS) semgrep  --config  "p/jwt" $(SEMGREP_EXCLUDE) $(SEMGREP_FLAGS) $known_issues
+        displayName: semgep scan p/jwt
+
+  - job: semgrep_r2c_bestpractices
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+      - script: python -m pip install --upgrade semgrep
+        displayName: install semgrep
+      - script: |
+          known_issues=$(egrep -v '^$|^#' .semgrepignore | xargs -n1 -d '\n'  -I % echo '--exclude %'  | tr '\n' ' '; echo)
+          $(SEMGREP_CORE_FLAGS) semgrep  --config  "p/r2c-best-practices" $(SEMGREP_EXCLUDE) $(SEMGREP_FLAGS) $known_issues
+        displayName: semgep scan p/r2c-best-practices
+
+  - job: semgrep_client_js
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+      - script: python -m pip install --upgrade semgrep
+        displayName: install semgrep
+      - script: |
+          known_issues=$(egrep -v '^$|^#' .semgrepignore | xargs -n1 -d '\n'  -I % echo '--exclude %'  | tr '\n' ' '; echo)
+          $(SEMGREP_CORE_FLAGS) semgrep  --config  "p/clientside-js" $(SEMGREP_EXCLUDE) $(SEMGREP_FLAGS) $known_issues
+        displayName: semgep scan p/clientside-js
+
+  - job: semgrep_code_excn
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+      - script: python -m pip install --upgrade semgrep
+        displayName: install semgrep
+      - script: |
+          known_issues=$(egrep -v '^$|^#' .semgrepignore | xargs -n1 -d '\n'  -I % echo '--exclude %'  | tr '\n' ' '; echo)
+          $(SEMGREP_CORE_FLAGS) semgrep  --config  "p/hazanasec.dynamic code execution" $(SEMGREP_EXCLUDE) $(SEMGREP_FLAGS) $known_issues
+        displayName: semgep scan p/hazanasec.dynamic code execution
+
+  - job: semgrep_sec_error
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+      - script: python -m pip install --upgrade semgrep
+        displayName: install semgrep
+      - script: |
+          known_issues=$(egrep -v '^$|^#' .semgrepignore | xargs -n1 -d '\n'  -I % echo '--exclude %'  | tr '\n' ' '; echo)
+          $(SEMGREP_CORE_FLAGS) semgrep  --config  "p/jeshventhraja.all-security-errors" $(SEMGREP_EXCLUDE) $(SEMGREP_FLAGS) $known_issues
+        displayName: semgep scan p/jeshventhraja.all-security-errors

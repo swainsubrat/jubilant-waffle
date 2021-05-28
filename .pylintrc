@@ -1,0 +1,33 @@
+# source - https://github.com/adafruit/cookiecutter-adafruit-circuitpython/blob/master/%7B%7B%20cookiecutter.library_name%20%7D%7D/.pylintrc
+[MASTER]
+
+
+# Pickle collected data for later comparisons.
+persistent=yes
+
+disable=broad-except,raw-checker-failed,bad-inline-option,locally-disabled,locally-enabled,reload-builtin,deprecated-string-function,deprecated-str-translate-call,import-error,bad-continuation,import-error,too-many-return-statements,too-many-return-statements,no-else-return,too-many-branches,too-many-arguments,too-many-locals,line-too-long,no-value-for-parameter,too-many-statements,too-many-ancestors,too-many-lines,useless-suppression
+
+# Good variable names that needs to be excluded from pylint checks
+good-names=i,n
+
+# Set the output format. Available formats are text, parseable, colorized, json
+# and msvs (visual studio).You can also give a reporter class, eg
+# mypackage.mymodule.MyReporterClass.
+output-format=colorized
+
+# [MESSAGES CONTROL]
+# enable=useless-suppression
+
+[LOGGING]
+
+# Format style used to check logging format string. `old` means using %
+# formatting, while `new` is for `{}` formatting.
+logging-format-style=new
+
+[SIMILARITIES]
+
+# Minimum lines number of a similarity.
+min-similarity-lines=200
+
+# Ignore imports when computing similarities.
+ignore-imports=yes

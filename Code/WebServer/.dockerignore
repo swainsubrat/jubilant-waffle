@@ -1,0 +1,13 @@
+src/logs/
+src/temp/
+src/reports/
+RabbitMQData/
+
+dataDownloader.py
+.git
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
